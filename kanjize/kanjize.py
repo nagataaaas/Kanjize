@@ -10,9 +10,9 @@ def int2kanji(number, error="raise"):
     if error not in ("raise", "warn", "ignore"):
         raise ValueError("unexpected value {} for argument error".format(error))
 
-    kanji = {1: '一', 2: '二', 3: '三', 4: '四', 5: '五', 6: '六', 7: '七', 8: '八', 9: '九', 10: '十', 100: '百', 1000: '千',
-             10 ** 4: '万', 10 ** 8: '億', 10 ** 12: '兆', 10 ** 16: '京', 10 ** 20: "垓", 10 ** 24: "𥝱"}
+    kanji = {1: '一', 2: '二', 3: '三', 4: '四', 5: '五', 6: '六', 7: '七', 8: '八', 9: '九'}
     digits = ("", "万", "億", "兆", "京", "垓", "𥝱")
+
     if number >= 10 ** 28:
         if error == "raise":
             raise ValueError("{} ( >= 10 ** 28) is too big to this function".format(number))
@@ -64,7 +64,7 @@ def kanji2int(kanjis, error="raise"):
     num = 0
     c_num = 0
     c_digit = 0
-    dig = "京"
+    dig = "𥝱"
     for word in kanjis:
         try:
             if word in digits:
