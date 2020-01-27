@@ -1,11 +1,11 @@
 README.md
 setup.py
-Kanjize.egg-info/PKG-INFO
-Kanjize.egg-info/SOURCES.txt
-Kanjize.egg-info/dependency_links.txt
-Kanjize.egg-info/not-zip-safe
-Kanjize.egg-info/top_level.txt
 kanjize/__about__.py
 kanjize/__init__.py
 kanjize/kanjize.py
+kanjize.egg-info/PKG-INFO
+kanjize.egg-info/SOURCES.txt
+kanjize.egg-info/dependency_links.txt
+kanjize.egg-info/not-zip-safe
+kanjize.egg-info/top_level.txt
 test/test.py

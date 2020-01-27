@@ -1,9 +1,10 @@
 from .__about__ import __version__
-from .kanjize import (int2kanji, kanji2int)
+from .kanjize import (int2kanji, kanji2int, Number)
 
 
 __all__ = [
     __version__,
     "int2kanji",
-    "kanji2int"
+    "kanji2int",
+    "Number"
 ]
