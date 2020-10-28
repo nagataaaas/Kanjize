@@ -3,7 +3,7 @@ import itertools
 from warnings import warn
 
 
-def int2kanji(number, error="raise", style="all", kanji_thousand=True):
+def int2kanji(number: int, error="raise", style="all", kanji_thousand=True) -> str:
     """
     :param number - int: Integer to convert into Kanji
     :param error - str: How to handle Error. "raise": raise error. "ignore": ignore error , "warn": warn but don't raise
@@ -66,7 +66,7 @@ def int2kanji(number, error="raise", style="all", kanji_thousand=True):
         return res
 
 
-def kanji2int(kanjis, error="raise", style="auto"):
+def kanji2int(kanjis: str, error="raise", style="auto") -> int:
     """
     :param kanjis - str: Kanji str to convert into Integer
     :param error - str: How to handle Error. "raise": raise error. "ignore": ignore error , "warn": warn but don't raise
@@ -75,45 +75,39 @@ def kanji2int(kanjis, error="raise", style="auto"):
     """
     if error not in ("raise", "warn", "ignore"):
         raise ValueError("unexpected value {} for argument error".format(error))
-    kanji = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10, "百": 100, "千": 1000,
-             "万": 10 ** 4, "億": 10 ** 8, "兆": 10 ** 12, "京": 10 ** 16, "垓": 10 ** 20, "𥝱": 10 ** 24}
-    digits = ("十", "百", "千", "万", "億", "兆", "京", "垓", "𥝱")
+    number = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9}
+    little_digit = {"十": 10, "百": 100, "千": 1000}
+    digit = {"万": 10 ** 4, "億": 10 ** 8, "兆": 10 ** 12, "京": 10 ** 16, "垓": 10 ** 20, "𥝱": 10 ** 24}
+    all_digit = little_digit.copy()
+    all_digit.update(digit)
+
     if style not in ("all", "mixed", "auto"):
         raise ValueError("unexpected value {} for argument style".format(style))  # check arguments
 
     num = 0
-    c_num = 0
-    c_digit = 0
-    dig = "𥝱"
     if style == "mixed" or (style == "auto" and any(str(num) in kanjis for num in range(10))):
         for spl in re.compile("[0-9]+千?[万億兆京垓]?").findall(kanjis):
             c_num = int("".join(filter(str.isdecimal, spl)))
             c_digit = 1
             for dig in itertools.filterfalse(str.isdecimal, spl):
-                c_digit *= kanji[dig]
+                c_digit *= all_digit.get(dig)
             num += c_num * c_digit
         return num
     else:
+        current_mini_num = 0
+        current_num = 0
         for word in kanjis:
-            try:
-                if word in digits:
-                    if kanji[word] >= kanji[dig]:
-                        num += (c_num + c_digit) * kanji[word]
-                        c_num, c_digit = 0, 0
-                    elif c_digit:
-                        c_num += c_digit * kanji[word]
-                        c_digit = 0
-                    else:
-                        c_num += kanji[word]
-                    dig = word
-                else:
-                    c_digit += kanji[word]
-            except KeyError:
-                if error == "raise":
-                    raise ValueError("unexpected letter")
-                elif error == "warn":
-                    warn("unexpected letter")
-        return num + c_num + c_digit
+            if word in number:
+                current_mini_num = number[word]
+            elif word in little_digit:
+                current_num += (current_mini_num if current_mini_num else 1) * little_digit[word]
+                current_mini_num = 0
+            elif word in digit:
+                num += (current_num + current_mini_num) * digit[word]
+                current_num = current_mini_num = 0
+            else:
+                raise ValueError("unexpected letter")
+        return num + current_num + current_mini_num
 
 
 class Number(int):
@@ -159,3 +153,4 @@ class Number(int):
 
     def __repr__(self):
         return "Number<{}>".format(int(self))
+
