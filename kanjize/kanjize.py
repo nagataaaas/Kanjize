@@ -70,7 +70,7 @@ def kanji2int(kanjis: str, error="raise", style="auto") -> int:
     """
     :param kanjis - str: Kanji str to convert into Integer
     :param error - str: How to handle Error. "raise": raise error. "ignore": ignore error , "warn": warn but don't raise
-    :param style - str: Which style of format will be used. "mixed": Arabic and Kanji Mixed like "4億5230万3千", "all": All letter will be Kanji, "auto": detect automatically by checking any arabic character is in kanjis.
+    :param style - str: Which style of format will be used. "mixed": Arabic and Kanji Mixed like "4億5230万3千", "all": All letter must be Kanji, "auto": detect automatically by checking any arabic character is in kanjis.
     :return: int
     """
     if error not in ("raise", "warn", "ignore"):
@@ -86,13 +86,20 @@ def kanji2int(kanjis: str, error="raise", style="auto") -> int:
 
     num = 0
     if style == "mixed" or (style == "auto" and any(str(num) in kanjis for num in range(10))):
-        for spl in re.compile("[0-9]+千?[万億兆京垓]?").findall(kanjis):
-            c_num = int("".join(filter(str.isdecimal, spl)))
-            c_digit = 1
-            for dig in itertools.filterfalse(str.isdecimal, spl):
-                c_digit *= all_digit.get(dig)
-            num += c_num * c_digit
+        for group in re.compile("([0-9]*?千)?([0-9]*?百)?([0-9]*?十)?([0-9]*)([万億兆京垓]?)").findall(kanjis)[:-1]:
+            c_num = 0
+            for index, dig in enumerate(group[:4]):
+                if dig:
+                    c_num += (1000, 100, 10, 1)[index] * int(dig.rstrip('千百十') or 1)
+            num += c_num * digit.get(group[-1], 1)
         return num
+        # for spl in re.compile("[0-9]+千?[万億兆京垓]?").findall(kanjis):
+        #     c_num = int("".join(filter(str.isdecimal, spl)))
+        #     c_digit = 1
+        #     for dig in itertools.filterfalse(str.isdecimal, spl):
+        #         c_digit *= all_digit.get(dig)
+        #     num += c_num * c_digit
+        # return num
     else:
         current_mini_num = 0
         current_num = 0

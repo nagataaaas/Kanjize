@@ -37,6 +37,17 @@ class TestKanjize(unittest.TestCase):
         self.assertEqual(50000000000000000000, kanji2int("5千京", style="mixed"))
         self.assertEqual(394385000048950000, kanji2int("39京4385兆4895万", style="mixed"))
 
+        # added 0.2.1
+        self.assertEqual(1001, kanji2int("千1", style="mixed"))
+        self.assertEqual(2025, kanji2int("2千2十5", style="mixed"))
+        self.assertEqual(4000000, kanji2int("4百万", style="mixed"))
+        self.assertEqual(58076099, kanji2int("58百7万6千99", style="mixed"))
+        self.assertEqual(223423542566000, kanji2int("2百23兆4千2百3十5億4256万6千", style="mixed"))
+        self.assertEqual(223400042566000, kanji2int("223兆4千億4256万6千", style="mixed"))
+        self.assertEqual(223400042566000, kanji2int("2234千億4256万6千", style="mixed"))
+        self.assertEqual(50500000000000000000, kanji2int("5千5十京", style="mixed"))
+        self.assertEqual(394385000048950000, kanji2int("39京4385兆4895万", style="mixed"))
+
     def testint2kanji(self):
         self.assertEqual(int2kanji(1), "一", "all")
         self.assertEqual(int2kanji(10), "十", "all")

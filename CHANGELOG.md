@@ -1,3 +1,10 @@
+# v0.2.1
+- Now this library can parse any kanji-number which has 千/百/十 in its inside.
+
+# v0.2.0
+- Changed algorithm to parse kanji
+- fixed bug
+
 # v0.1.0
 - Added `Number` class.
 - Added `style` argument to `kanji2int` and `int2kanji` that specifies style of formatting.
