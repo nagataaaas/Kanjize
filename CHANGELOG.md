@@ -1,3 +1,6 @@
+# v1.0.0
+- Removed restrictions of of maximum number. This now can handle number up to 10 ** 72 -1.
+
 # v0.2.1
 - Now this library can parse any kanji-number which has 千/百/十 in its inside.
 

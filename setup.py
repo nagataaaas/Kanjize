@@ -3,9 +3,9 @@ Easy converter between Kanji-Number and Integer
 -----------
 Powered by [Yamato Nagata](https://twitter.com/514YJ)
 
-[GitHub](https://github.com/delta114514/Kanjize)
+[GitHub](https://github.com/nagataaaas/Kanjize)
 
-Can Convert Number up to 10 ** 28 - 1
+Can Convert Number up to 10 ** 72 - 1
 
 ```python
 from kanjize import int2kanji, kanji2int, Number
@@ -55,7 +55,7 @@ setup(name=about["__title__"],
       zip_safe=False,
       platforms="any",
       classifiers=[
-          "Development Status :: 4 - Beta",
+          "Development Status :: 5 - Production/Stable",
           "Environment :: Other Environment",
           "Intended Audience :: Developers",
           "License :: OSI Approved :: MIT License",

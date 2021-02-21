@@ -1,8 +1,8 @@
 Metadata-Version: 2.1
 Name: kanjize
-Version: 0.2.1
+Version: 1.0.0
 Summary: Easy converter between Kanji-Number and Integer
-Home-page: https://github.com/delta114514/kanjize
+Home-page: https://github.com/nagataaaas/kanjize
 Author: Yamato Nagata
 Author-email: chickenwingswillfly@gmail.com
 License: MIT
@@ -11,9 +11,9 @@ Description:
         -----------
         Powered by [Yamato Nagata](https://twitter.com/514YJ)
         
-        [GitHub](https://github.com/delta114514/Kanjize)
+        [GitHub](https://github.com/nagataaaas/Kanjize)
         
-        Can Convert Number up to 10 ** 28 - 1
+        Can Convert Number up to 10 ** 72 - 1
         
         ```python
         from kanjize import int2kanji, kanji2int, Number
@@ -41,7 +41,7 @@ Description:
         ```
         
 Platform: any
-Classifier: Development Status :: 4 - Beta
+Classifier: Development Status :: 5 - Production/Stable
 Classifier: Environment :: Other Environment
 Classifier: Intended Audience :: Developers
 Classifier: License :: OSI Approved :: MIT License
