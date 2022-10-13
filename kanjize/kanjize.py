@@ -4,10 +4,10 @@ import re
 
 def int2kanji(number: int, error="raise", style="all", kanji_thousand=True) -> str:
     """
-    :param number - int: Integer to convert into Kanji
-    :param error - str: How to handle Error. "raise": raise error. "ignore": ignore error , "warn": warn but don't raise
-    :param style - str: Which style of format will be used. "mixed": Arabic and Kanji Mixed like "4億5230万3千", "all": All letter will be Kanji.
-    :param kanji_thousand - bool: Whether make thousand to kanji. this will be used if style="mixed"
+    :param number: Integer to convert into Kanji
+    :param error: How to handle Error. "raise": raise error. "ignore": ignore error , "warn": warn but don't raise
+    :param style: Which style of format will be used. "mixed": Arabic and Kanji Mixed like "4億5230万3千", "all": All letter will be Kanji.
+    :param kanji_thousand: Whether you make a thousand to kanji. this will be used if style="mixed"
     :return: str
     """
     if error not in ("raise", "warn", "ignore"):
@@ -22,7 +22,7 @@ def int2kanji(number: int, error="raise", style="all", kanji_thousand=True) -> s
         res = ""  # all letters will be added to this
 
         for i in range(math.ceil(math.log(number, 1000)), -1, -1):
-            c_num = str((number % (10 ** ((i + 1) * 4))) // (10 ** (i * 4))).zfill(4)  # reminder
+            c_num = str((number % (10 ** ((i + 1) * 4))) // (10 ** (i * 4))).zfill(4)  # remainder
             c_str = ""
             if c_num == "0000":
                 continue
@@ -61,47 +61,59 @@ def int2kanji(number: int, error="raise", style="all", kanji_thousand=True) -> s
 
 def kanji2int(kanjis: str, error="raise", style="auto") -> int:
     """
-    :param kanjis - str: Kanji str to convert into Integer
-    :param error - str: How to handle Error. "raise": raise error. "ignore": ignore error , "warn": warn but don't raise
-    :param style - str: Which style of format will be used. "mixed": Arabic and Kanji Mixed like "4億5230万3千", "all": All letter must be Kanji, "auto": detect automatically by checking any arabic character is in kanjis.
+    :param kanjis: Kanji str to convert into Integer
+    :param error: How to handle Error. "raise": raise error. "ignore": ignore error , "warn": warn but don't raise
+    :param style: Which style of format will be used. "mixed": Arabic and Kanji Mixed like "4億5230万3千", "all": All letter must be Kanji, "auto": detect automatically by checking any arabic character is in kanjis.
     :return: int
     """
     if error not in ("raise", "warn", "ignore"):
         raise ValueError("unexpected value {} for argument error".format(error))
-    number = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9}
-    little_digit = {"十": 1, "百": 2, "千": 3}
-    digit = {"万": 4, "億": 8, "兆": 12, "京": 16, "垓": 20, "𥝱": 24, "穣": 28, "溝": 32, "澗": 36, "正": 40, "載": 44,
+    number_dict = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9}
+    little_digit_dict = {"十": 1, "百": 2, "千": 3}
+    digit_dict = {"万": 4, "億": 8, "兆": 12, "京": 16, "垓": 20, "𥝱": 24, "穣": 28, "溝": 32, "澗": 36, "正": 40, "載": 44,
              "極": 48, "恒河沙": 52, "阿僧祇": 56, "那由多": 60, "不可思議": 64, "無量大数": 68}
 
     if style not in ("all", "mixed", "auto"):
         raise ValueError("unexpected value {} for argument style".format(style))  # check arguments
 
-    num = 0
+    result = 0
     if style == "mixed" or (style == "auto" and any(str(num) in kanjis for num in range(10))):
-        for group in re.compile("([0-9]*?千)?([0-9]*?百)?([0-9]*?十)?([0-9]*)({})?".format('|'.join(digit.keys()))) \
-                             .findall(kanjis)[:-1]:
-            c_num = 0
-            for index, dig in enumerate(group[:4]):
-                if dig:
-                    c_num += (1000, 100, 10, 1)[index] * int(dig.rstrip('千百十') or 1)
-            num += c_num * 10 ** digit.get(group[-1], 0)
-        return num
+        while kanjis:
+            value = 0
+            while kanjis:
+                left_value = re.compile(rf'(^\d*)(\.\d+)?([千百十]?)(.*)').search(kanjis)
+                current, float_number, little_digit,  kanjis = left_value.groups()
+                current = int(current or 1)
+                if float_number:
+                    current += float(float_number)
+                if little_digit:
+                    current *= 10 ** little_digit_dict[little_digit]
+                value += current
+
+                head = re.match(r'{}'.format('|'.join(digit_dict.keys())), kanjis)
+                if not kanjis or head:
+                    digit = head.group(0) if kanjis else ''
+                    result += value * 10 ** digit_dict.get(digit, 0)
+                    value = 0
+                    kanjis = kanjis[len(digit):]
+
+        return result
     else:
         current_mini_num = 0
         current_num = 0
-        for word in re.compile('|'.join(list(number.keys()) + list(little_digit.keys()) + list(digit.keys()))) \
+        for word in re.compile('|'.join(list(number_dict.keys()) + list(little_digit_dict.keys()) + list(digit_dict.keys()))) \
                 .findall(kanjis):
-            if word in number:
-                current_mini_num = number[word]
-            elif word in little_digit:
-                current_num += (current_mini_num if current_mini_num else 1) * 10 ** little_digit[word]
+            if word in number_dict:
+                current_mini_num = number_dict[word]
+            elif word in little_digit_dict:
+                current_num += (current_mini_num if current_mini_num else 1) * 10 ** little_digit_dict[word]
                 current_mini_num = 0
-            elif word in digit:
-                num += (current_num + current_mini_num) * 10 ** digit[word]
+            elif word in digit_dict:
+                result += (current_num + current_mini_num) * 10 ** digit_dict[word]
                 current_num = current_mini_num = 0
             else:
                 raise ValueError("unexpected letter: {}".format(word))
-        return num + current_num + current_mini_num
+        return result + current_num + current_mini_num
 
 
 class Number(int):
