@@ -9,4 +9,3 @@ kanjize.egg-info/SOURCES.txt
 kanjize.egg-info/dependency_links.txt
 kanjize.egg-info/not-zip-safe
 kanjize.egg-info/top_level.txt
-test/test.py

@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: kanjize
-Version: 1.1.0
+Version: 1.2.0
 Summary: Easy converter between Kanji-Number and Integer
 Home-page: https://github.com/nagataaaas/kanjize
 Author: Yamato Nagata
@@ -51,5 +51,3 @@ print(int2kanji(223400042566000, style="mixed"))
 print((Number.from_kanji("223兆4千億4256万6千") * Number(2.3)).to_kanji(style="mixed"))
     # 446兆8千億8513万2千
 ```
-
-
