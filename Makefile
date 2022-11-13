@@ -16,7 +16,7 @@ install:
 	pip install -e . --force-reinstall
 
 test:
-	python test/test.py
+	python tests/test.py
 
 clean:
 	rm -rf *.egg-info .pytest_cache build
