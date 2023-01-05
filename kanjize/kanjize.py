@@ -1,11 +1,10 @@
 import math
 import re
-import warnings
 from decimal import Decimal, DecimalException
 from typing import Optional
 
 
-def int2kanji(number: int, error="raise", style="all", kanji_thousand=True) -> str:
+def number2kanji(number: int, error="raise", style="all", kanji_thousand=True) -> str:
     """
     :param number: Integer to convert into Kanji
     :param error: How to handle Error. "raise": raise error. "ignore": ignore error , "warn": warn but don't raise
@@ -69,84 +68,7 @@ def int2kanji(number: int, error="raise", style="all", kanji_thousand=True) -> s
     return result
 
 
-def kanji2int(kanjis: str, error="raise", style="auto") -> int:
-    """
-    :param kanjis: Kanji str to convert into Integer
-    :param error: How to handle Error. "raise": raise error. "ignore": ignore error , "warn": warn but don't raise
-    :param style: Which style of format will be used. "mixed": Arabic and Kanji Mixed like "4億5230万3千", "all": All letter must be Kanji, "auto": detect automatically by checking any arabic character is in kanjis.
-    :return: int
-    """
-    warnings.warn("`kanji2int` is deprecated. consider using `kanji2number` instead", DeprecationWarning)
-    given = kanjis
-    if error not in ("raise", "warn", "ignore"):
-        raise ValueError("unexpected value {} for argument error".format(error))
-    number_dict = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9}
-    little_digit_dict = {"十": 1, "百": 2, "千": 3}
-    digit_dict = {"万": 4, "億": 8, "兆": 12, "京": 16, "垓": 20, "𥝱": 24, "穣": 28, "溝": 32, "澗": 36, "正": 40,
-                  "載": 44, "極": 48, "恒河沙": 52, "阿僧祇": 56, "那由多": 60, "不可思議": 64, "無量大数": 68}
-
-    if style not in ("all", "mixed", "auto"):
-        raise ValueError("unexpected value {} for argument style".format(style))  # check arguments
-
-    negative = False
-    if kanjis[0] in '-－⁻':
-        negative = True
-        kanjis = kanjis[1:]
-    elif kanjis[0] in '+＋⁺₊+':
-        kanjis = kanjis[1:]
-
-    result = 0
-    if style == "mixed" or (style == "auto" and any(str(num) in kanjis for num in range(10))):
-        while kanjis:
-            value = 0
-            while kanjis:
-                left_value = re.compile(rf'(^\d*)(\.\d+)?([千百十]?)(.*)').search(kanjis)
-
-                current, float_number, little_digit, kanjis = left_value.groups()
-                head = re.match(r'{}'.format('|'.join(digit_dict.keys())), kanjis)
-
-                if kanjis and not any([current, float_number, little_digit, head]):
-                    if error == "raise":
-                        raise ValueError(f"Kanji `{given}` seems not to be a valid kanji number.")
-                    elif error == "warn":
-                        warnings.warn(f"Kanji `{given}` seems not to be a valid kanji number.")
-                    return result
-
-                current = int(current or 1)
-                if float_number:
-                    current += float(float_number)
-                if little_digit:
-                    current *= 10 ** little_digit_dict[little_digit]
-                value += current
-
-                if not kanjis or head:
-                    digit = head.group(0) if kanjis else ''
-                    result += value * 10 ** digit_dict.get(digit, 0)
-                    value = 0
-                    kanjis = kanjis[len(digit):]
-    else:
-        current_mini_num = 0
-        current_num = 0
-        for word in re.compile(
-                '|'.join(list(number_dict.keys()) + list(little_digit_dict.keys()) + list(digit_dict.keys()))) \
-                .findall(kanjis):
-            if word in number_dict:
-                current_mini_num = number_dict[word]
-            elif word in little_digit_dict:
-                current_num += (current_mini_num if current_mini_num else 1) * 10 ** little_digit_dict[word]
-                current_mini_num = 0
-            elif word in digit_dict:
-                result += (current_num + current_mini_num) * 10 ** digit_dict[word]
-                current_num = current_mini_num = 0
-            else:
-                if error == "raise":
-                    raise ValueError("unexpected letter: {}".format(word))
-                elif error == "warn":
-                    warnings.warn("unexpected letter: {}".format(word))
-                return result
-        result += current_num + current_mini_num
-
-    return -result if negative else result
+int2kanji = number2kanji
 
 
 def kanji2number(kanjis: str) -> float:
@@ -154,15 +76,14 @@ def kanji2number(kanjis: str) -> float:
     :param kanjis: Kanji str to convert into Integer
     :return: float
     """
+    if not kanjis:
+        raise ValueError("Kanji is empty")
     given = kanjis
     digit_dict = {"万": 4, "億": 8, "兆": 12, "京": 16, "垓": 20, "𥝱": 24, "穣": 28, "溝": 32, "澗": 36, "正": 40,
                   "載": 44, "極": 48, "恒河沙": 52, "阿僧祇": 56, "那由多": 60, "不可思議": 64, "無量大数": 68}
 
-    negative = False
-    if kanjis[0] in '-－⁻':
-        negative = True
-        kanjis = kanjis[1:]
-    elif kanjis[0] in '+＋⁺₊+':
+    negative = kanjis[0] in '-－⁻'
+    if kanjis[0] in '-－⁻+＋⁺₊+':
         kanjis = kanjis[1:]
 
     match = re.compile(r'(?:(.+?)({}))?(.*)'.format('|'.join(digit_dict.keys()))).match(kanjis)

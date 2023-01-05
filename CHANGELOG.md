@@ -1,3 +1,8 @@
+# 1.3.0
+
+- Remove `kanji2int`
+- Add `number2kanji` for compatibility with `number2kanji`
+
 # v1.2.0
 
 - Support negative value on `kanji2int` and `int2kanji`
