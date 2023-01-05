@@ -1,3 +1,5 @@
 .idea
 .pypirc
-kanjize/__pycache__
+__pycache__
+dist
+Kanjize.egg-info
