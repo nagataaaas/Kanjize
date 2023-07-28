@@ -83,29 +83,45 @@ def kanji2number(kanjis: str) -> float:
         return 0
 
     given = kanjis
-    digit_dict = {"万": 4, "億": 8, "兆": 12, "京": 16, "垓": 20, "𥝱": 24, "穣": 28, "溝": 32, "澗": 36, "正": 40,
-                  "載": 44, "極": 48, "恒河沙": 52, "阿僧祇": 56, "那由多": 60, "不可思議": 64, "無量大数": 68}
-
     negative = kanjis[0] in '-－⁻'
     if kanjis[0] in '-－⁻+＋⁺₊+':
         kanjis = kanjis[1:]
+    result = _kanji2number(given, kanjis)[0]
+    return result * -1 if negative else result
 
-    match = re.compile(r'(?:(.+?)({}))?(.*)'.format('|'.join(digit_dict.keys()))).match(kanjis)
+def _kanji2number(given: str, kanjis: str) -> (float, str):
+    """Internal function. Converts kanji str without sign to the number.
+    This calls itself recursively.
+
+    :param given: Original kanji str to be converted finally
+    :param kanjis: Kanji str to be converted
+    :return: the value of kanjis and the name of the most siginificant unit
+    :rtype: (float, str)
+    :raises ValueError: if the value of kanjis is invalid as number
+    """
+    digit_dict = {"万": 4, "億": 8, "兆": 12, "京": 16, "垓": 20, "𥝱": 24, "穣": 28, "溝": 32, "澗": 36, "正": 40,
+                  "載": 44, "極": 48, "恒河沙": 52, "阿僧祇": 56, "那由多": 60, "不可思議": 64, "無量大数": 68}
+
+    match = re.compile(r'(?:(.*?)({}))?(.*)'.format('|'.join(digit_dict.keys()))).match(kanjis)
     left_val, left_digit, kanjis = match.groups()
 
     if left_digit and not left_val:
-        raise ValueError(f"Kanji `{given}` seems to be invalid. `{left_digit}` is not followed by any number.")
+        raise ValueError(f"Kanji `{given}` seems to be invalid. `{left_digit}` needs any leading number.")
 
     base_digit = digit_dict[left_digit] if left_digit else 0
     result = parse_short(left_val, base_digit)
 
     if re.search('|'.join(digit_dict.keys()), kanjis):
-        result += kanji2number(kanjis)
+        fraction, digit = _kanji2number(given, kanjis)
+        if base_digit <= digit_dict[digit]:
+            raise ValueError(f"Kanji `{given}` seems to be invalid. `{left_digit}` is followed by too large unit `{digit}`.")
     else:
-        result += parse_short(kanjis)
+        fraction = parse_short(kanjis)
 
-    return result * -1 if negative else result
+    if base_digit and 10 ** base_digit <= fraction:
+        raise ValueError(f"Kanji `{given}` seems to be invalid. `{left_digit}` is followed by too large number `{kanjis}`.")
 
+    return result + fraction, left_digit
 
 def parse_short(kanji: Optional[str], base_digit: int = 0) -> float:
     """
@@ -117,13 +133,14 @@ def parse_short(kanji: Optional[str], base_digit: int = 0) -> float:
         return 0
     number_dict = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9}
     little_digit_dict = {"十": 1, "百": 2, "千": 3}
-    if not re.compile(r'[.\d{}{}]'.format(''.join(little_digit_dict.keys()),
+    if not re.compile(r'[.\d{}{}]+$'.format(''.join(little_digit_dict.keys()),
                                           ''.join(number_dict.keys()))).match(kanji):
         raise ValueError(f"Kanji `{kanji}` seems to be invalid.")
     match = re.compile(r'(?:(.*)(?:千))?(?:(.*)(?:百))?(?:(.*)(?:十))?(.+)?').match(kanji)
 
     thousand, hundred, ten, one = match.groups()
     result = 0
+    left_digit = 0
     for v, digit in ([thousand, 1000], [hundred, 100], [ten, 10], [one, 1]):
         if v is None:
             continue
@@ -136,6 +153,11 @@ def parse_short(kanji: Optional[str], base_digit: int = 0) -> float:
             if v is None:
                 raise ValueError(f"Kanji `{kanji}` seems to be invalid.")
             v = Decimal(v)
+
+        if left_digit and left_digit <= v * digit:
+            raise ValueError(f"Kanji `{kanji}` seems to be invalid. Unit `{left_digit}` is followed by too large number `{v}`.")
+        left_digit = digit
+
         result += v * digit
     int_, *float_ = str(result).split('.')
     result *= 10 ** base_digit
