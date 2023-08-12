@@ -144,7 +144,7 @@ class Number(int):
         return cls(kanji2number(kanjis=kanjis))
 
     def to_kanji(self, error="raise", style="all", kanji_thousand=True):
-        return int2kanji(number=int(self), error=error, style=style, kanji_thousand=kanji_thousand)
+        return number2kanji(number=int(self), error=error, style=style, kanji_thousand=kanji_thousand)
 
     def __add__(self, other):
         return Number(int.__add__(self, other))
