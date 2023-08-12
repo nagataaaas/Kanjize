@@ -1,3 +1,7 @@
+# 1.4.0
+
+- support 0 for `kanji2number` and `number2kanji`
+
 # 1.3.0
 
 - Remove `kanji2int`

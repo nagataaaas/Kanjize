@@ -17,6 +17,9 @@ def number2kanji(number: int, error="raise", style="all", kanji_thousand=True) -
     if style not in ("all", "mixed"):
         raise ValueError("unexpected value {} for argument style".format(style))  # check arguments
 
+    if number == 0:
+        return "零"
+
     kanji = {1: '一', 2: '二', 3: '三', 4: '四', 5: '五', 6: '六', 7: '七', 8: '八', 9: '九'}
     digits = (
         '', '万', '億', '兆', '京', '垓', '𥝱', '穣', '溝', '澗', '正', '載', '極', '恒河沙', '阿僧祇', '那由多',
@@ -75,6 +78,10 @@ def kanji2number(kanjis: str) -> float:
     """
     if not kanjis:
         raise ValueError("Kanji is empty")
+
+    if kanjis == "零":
+        return 0
+
     given = kanjis
     digit_dict = {"万": 4, "億": 8, "兆": 12, "京": 16, "垓": 20, "𥝱": 24, "穣": 28, "溝": 32, "澗": 36, "正": 40,
                   "載": 44, "極": 48, "恒河沙": 52, "阿僧祇": 56, "那由多": 60, "不可思議": 64, "無量大数": 68}

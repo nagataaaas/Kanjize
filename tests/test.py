@@ -81,7 +81,10 @@ class TestKanjize(unittest.TestCase):
         self.assertEqual(1234, kanji2number("一千二百三十四"))
         self.assertEqual(1234, kanji2number("千二百三十四"))
 
-    def test_int2kanji(self):
+        # added 1.4.0
+        self.assertEqual(0, kanji2number("零"))
+
+    def test_number2kanji(self):
         self.assertEqual(number2kanji(1), "一", "all")
         self.assertEqual(number2kanji(10), "十", "all")
         self.assertEqual(number2kanji(11), "十一", "all")
@@ -136,10 +139,19 @@ class TestKanjize(unittest.TestCase):
         self.assertEqual(number2kanji(-250_320, style="mixed"), "-25万320")
         self.assertEqual(number2kanji(-150_250_320, style="mixed"), "-1億5025万320")
 
+        # added 1.4.0
+        self.assertEqual(number2kanji(0), "零")
+
     def test_number(self):
         self.assertEqual(12000, Number(276_493_734) - Number.from_kanji("2億7648万1734"))
         self.assertEqual(12734, Number(276_493_734) - Number.from_kanji("2億7648万1千"))
         self.assertEqual("2億7648万1734", (Number(276_493_734) - Number(12_000)).to_kanji(style="mixed"))
+
+        # added 1.4.0
+        self.assertEqual(0, Number(0) * Number.from_kanji("2億7648万1千"))
+
+        with self.assertRaises(ZeroDivisionError):
+            Number(2) / Number(0)
 
 
 if __name__ == "__main__":
