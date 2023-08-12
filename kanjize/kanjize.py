@@ -68,9 +68,6 @@ def number2kanji(number: int, error="raise", style="all", kanji_thousand=True) -
     return result
 
 
-int2kanji = number2kanji
-
-
 def kanji2number(kanjis: str) -> float:
     """
     :param kanjis: Kanji str to convert into Integer
