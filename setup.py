@@ -57,25 +57,27 @@ with open("kanjize/__about__.py") as f:
 
 here = path.abspath(path.dirname(__file__))
 
-setup(name=about["__title__"],
-      version=about["__version__"],
-      url=about["__url__"],
-      license=about["__license__"],
-      author=about["__author__"],
-      author_email=about["__author_email__"],
-      description=about["__description__"],
-      long_description=__doc__,
-      long_description_content_type="text/markdown",
-      packages=["kanjize"],
-      zip_safe=False,
-      platforms="any",
-      classifiers=[
-          "Development Status :: 5 - Production/Stable",
-          "Environment :: Other Environment",
-          "Intended Audience :: Developers",
-          "License :: OSI Approved :: MIT License",
-          "Operating System :: OS Independent",
-          "Programming Language :: Python :: 3",
-          "Programming Language :: Python",
-          "Topic :: Software Development :: Libraries :: Python Modules"
-      ])
+setup(
+    name=about["__title__"],
+    version=about["__version__"],
+    url=about["__url__"],
+    license=about["__license__"],
+    author=about["__author__"],
+    author_email=about["__author_email__"],
+    description=about["__description__"],
+    long_description=__doc__,
+    long_description_content_type="text/markdown",
+    packages=["kanjize"],
+    zip_safe=False,
+    platforms="any",
+    classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Environment :: Other Environment",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+    ],
+)
