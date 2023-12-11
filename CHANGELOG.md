@@ -1,5 +1,11 @@
 # 1.5.0
+
 - more accurate error raising. (contributed by @ikedas)
+- add `KanjizeConfiguration`
+- add new style `FLAT`
+- add new option `use_daiji`
+- now `kanji2number` can parse number string with daiji.
+- now you can choose '〇' as zero over '零' by setting `KanjiConfiguration(zero=KanjizeZero.SIGN)`
 
 # 1.4.0
 
