@@ -1,6 +1,13 @@
 import unittest
 
-from kanjize import *
+from kanjize import (
+    number2kanji,
+    kanji2number,
+    Number,
+    KanjizeConfiguration,
+    KanjizeZero,
+    KanjizeStyle,
+)
 
 
 class TestKanjize(unittest.TestCase):
