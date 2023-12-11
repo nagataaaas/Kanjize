@@ -123,6 +123,8 @@ class TestKanjize:
         assert 0 == kanji2number("〇")
         assert 404 == kanji2number("四〇四")
         assert 1234 == kanji2number("阡二百三拾四")
+        assert 601 == kanji2number("六〇一")
+        assert 601 == kanji2number("六零一")
 
     def test_number2kanji(self):
         assert number2kanji(1) == "一"
