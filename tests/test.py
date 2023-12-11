@@ -84,6 +84,27 @@ class TestKanjize(unittest.TestCase):
         # added 1.4.0
         self.assertEqual(0, kanji2number("零"))
 
+        # added after 1.4.0
+        self.assertEqual(12345, kanji2number("12千345"))
+        with self.assertRaises(ValueError):
+            kanji2number("1千1000")
+        with self.assertRaises(ValueError):
+            kanji2number("1万10千")
+        with self.assertRaises(ValueError):
+            kanji2number("万1千234")
+        with self.assertRaises(ValueError):
+            kanji2number("1万0万")
+        with self.assertRaises(ValueError):
+            kanji2number("1万.00009億")
+        with self.assertRaises(ValueError):
+            kanji2number("1億-2万")
+        with self.assertRaises(ValueError):
+            kanji2number("1万+2")
+        with self.assertRaises(ValueError):
+            kanji2number("千2e1")
+        with self.assertRaises(ValueError):
+            kanji2number("inf")
+
     def test_number2kanji(self):
         self.assertEqual(number2kanji(1), "一", "all")
         self.assertEqual(number2kanji(10), "十", "all")
