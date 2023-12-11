@@ -1,3 +1,6 @@
+# 1.5.0
+- more accurate error raising. (contributed by @ikedas)
+
 # 1.4.0
 
 - support 0 for `kanji2number` and `number2kanji`
