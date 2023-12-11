@@ -1,6 +1,6 @@
 import unittest
 
-from kanjize import number2kanji, Number, kanji2number
+from kanjize import *
 
 
 class TestKanjize(unittest.TestCase):
@@ -55,7 +55,7 @@ class TestKanjize(unittest.TestCase):
         self.assertEqual(223_4235_4256_6000, kanji2number("2百23兆4千2百3十5億4256万6千"))
         self.assertEqual(223_4000_4256_6000, kanji2number("223兆4千億4256万6千"))
         self.assertEqual(223_4000_4256_6000, kanji2number("2234千億4256万6千"))
-        self.assertEqual(5000_0000_0000_0000_0000, kanji2number("5千5十京"))
+        self.assertEqual(5050_0000_0000_0000_0000, kanji2number("5千5十京"))
         self.assertEqual(39_4385_0000_4895_0000, kanji2number("39京4385兆4895万"))
 
         # added 1.0.0
@@ -105,6 +105,10 @@ class TestKanjize(unittest.TestCase):
         with self.assertRaises(ValueError):
             kanji2number("inf")
 
+        self.assertEqual(0, kanji2number("〇"))
+        self.assertEqual(404, kanji2number("四〇四"))
+        self.assertEqual(1234, kanji2number("阡二百三拾四"))
+
     def test_number2kanji(self):
         self.assertEqual(number2kanji(1), "一", "all")
         self.assertEqual(number2kanji(10), "十", "all")
@@ -147,8 +151,7 @@ class TestKanjize(unittest.TestCase):
 
         # added 1.0.0
         self.assertEqual("1恒河沙", number2kanji(1_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000,
-                                                 style="mixed",
-                                                 kanji_thousand=False))
+                                                 style="mixed", kanji_thousand=False))
         self.assertEqual(
             "9999無量大数9999不可思議9999那由多9999阿僧祇9999恒河沙9999極9999載9999正9999澗9999溝9999穣9999𥝱9999垓9999京9999兆9999億9999万9999",
             number2kanji(9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999,
@@ -162,6 +165,25 @@ class TestKanjize(unittest.TestCase):
 
         # added 1.4.0
         self.assertEqual(number2kanji(0), "零")
+
+        # added 1.5.0
+        self.assertEqual("弐佰拾壱",
+                         number2kanji(211, config=KanjizeConfiguration(use_daiji=True)))
+        self.assertEqual("-1億5025万320",
+                         number2kanji(-1_5025_0320, config=KanjizeConfiguration(style=KanjizeStyle.MIXED)))
+        self.assertEqual("-1億5千万320",
+                         number2kanji(-1_5000_0320,
+                                      config=KanjizeConfiguration(style=KanjizeStyle.MIXED, kanji_thousand=True)))
+        self.assertEqual("-1億5阡萬320",
+                         number2kanji(-1_5000_0320,
+                                      config=KanjizeConfiguration(style=KanjizeStyle.MIXED, use_daiji=True,
+                                                                  kanji_thousand=True)))
+        self.assertEqual("六〇一",
+                         number2kanji(601, config=KanjizeConfiguration(style=KanjizeStyle.FLAT,
+                                                                       zero=KanjizeZero.SIGN)))
+        self.assertEqual("六零一",
+                         number2kanji(601, config=KanjizeConfiguration(style=KanjizeStyle.FLAT,
+                                                                       zero=KanjizeZero.KANJI)))
 
     def test_number(self):
         self.assertEqual(12000, Number(2_7649_3734) - Number.from_kanji("2億7648万1734"))
