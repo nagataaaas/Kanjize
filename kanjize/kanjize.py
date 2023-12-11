@@ -21,10 +21,8 @@ def number2kanji(number: int, error="raise", style="all", kanji_thousand=True) -
         return "零"
 
     kanji = {1: '一', 2: '二', 3: '三', 4: '四', 5: '五', 6: '六', 7: '七', 8: '八', 9: '九'}
-    units = (
-        '', '万', '億', '兆', '京', '垓', '𥝱', '穣', '溝', '澗', '正', '載', '極', '恒河沙', '阿僧祇', '那由多',
-        '不可思議',
-        '無量大数')
+    units = ('', '万', '億', '兆', '京', '垓', '𥝱', '穣', '溝', '澗', '正', '載', '極', '恒河沙', '阿僧祇', '那由多',
+             '不可思議', '無量大数')
 
     negative = number < 0
     number = abs(number)
@@ -101,7 +99,7 @@ def _kanji2number(given: str, kanjis: str) -> (float, str):
     :raises ValueError: if the value of kanjis is invalid as number
     """
     unit_dict = {"万": 4, "億": 8, "兆": 12, "京": 16, "垓": 20, "𥝱": 24, "穣": 28, "溝": 32, "澗": 36, "正": 40,
-                  "載": 44, "極": 48, "恒河沙": 52, "阿僧祇": 56, "那由多": 60, "不可思議": 64, "無量大数": 68}
+                 "載": 44, "極": 48, "恒河沙": 52, "阿僧祇": 56, "那由多": 60, "不可思議": 64, "無量大数": 68}
 
     match = re.compile(r'(?:(.*?)({}))?(.*)'.format('|'.join(unit_dict.keys()))).match(kanjis)
     left_val, left_unit, kanjis = match.groups()
