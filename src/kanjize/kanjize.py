@@ -1,8 +1,9 @@
 import enum
 import math
 import re
-import warnings
-from decimal import Decimal, DecimalException
+from dataclasses import dataclass
+from functools import lru_cache
+from typing import Any
 from typing import Optional
 
 
@@ -16,6 +17,42 @@ zero_kanji = "零"
 zero_sign = "〇"
 
 
+@dataclass(frozen=True)
+class KanjiType:
+    daiji: Any
+    shoji: Any
+
+
+DIGITS = KanjiType(
+    {
+        "壱": 1,
+        "弐": 2,
+        "参": 3,
+        "肆": 4,
+        "伍": 5,
+        "陸": 6,
+        "漆": 7,
+        "捌": 8,
+        "玖": 9,
+    },
+    {
+        "一": 1,
+        "二": 2,
+        "三": 3,
+        "四": 4,
+        "五": 5,
+        "六": 6,
+        "七": 7,
+        "八": 8,
+        "九": 9,
+    },
+)
+REVERSED_DIGITS = KanjiType(
+    {v: k for k, v in DIGITS.daiji.items()},
+    {v: k for k, v in DIGITS.shoji.items()},
+)
+
+
 class KanjizeZero(enum.Enum):
     KANJI = zero_kanji
     SIGN = zero_sign
@@ -23,11 +60,11 @@ class KanjizeZero(enum.Enum):
 
 class KanjizeConfiguration:
     def __init__(
-        self,
-        style: KanjizeStyle = KanjizeStyle.ALL,
-        zero: Optional[KanjizeZero] = None,
-        kanji_thousand: bool = True,
-        use_daiji: bool = False,
+            self,
+            style: KanjizeStyle = KanjizeStyle.ALL,
+            zero: Optional[KanjizeZero] = None,
+            kanji_thousand: bool = True,
+            use_daiji: bool = False,
     ):
         """
 
@@ -46,32 +83,14 @@ class KanjizeConfiguration:
 
     @property
     def digits(self):
-        if self.use_daiji:
-            return {
-                "壱": 1,
-                "弐": 2,
-                "参": 3,
-                "肆": 4,
-                "伍": 5,
-                "陸": 6,
-                "漆": 7,
-                "捌": 8,
-                "玖": 9,
-            }
-        return {
-            "一": 1,
-            "二": 2,
-            "三": 3,
-            "四": 4,
-            "五": 5,
-            "六": 6,
-            "七": 7,
-            "八": 8,
-            "九": 9,
-        }
+        return DIGITS.daiji if self.use_daiji else DIGITS.shoji
 
     @property
-    def little_units(self):
+    def reversed_digits(self):
+        return REVERSED_DIGITS.daiji if self.use_daiji else REVERSED_DIGITS.shoji
+
+    @property
+    def little_unit_by_value(self):
         if self.use_daiji:
             return {10: "拾", 100: "佰", 1000: "阡", 10000: "萬"}
         return {10: "十", 100: "百", 1000: "千", 10000: "万"}
@@ -102,106 +121,91 @@ class KanjizeConfiguration:
     def zero(self) -> str:
         return self._zero.value
 
+    @property
+    def flat_table(self):
+        return self._build_flat_table(self.use_daiji, self.zero)
+
+    @classmethod
+    @lru_cache(maxsize=None)
+    def _build_flat_table(cls, use_daiji: bool, zero: str):
+        return str.maketrans(
+            (
+                {
+                    str(k): v
+                    for k, v in (
+                    REVERSED_DIGITS.daiji if use_daiji else REVERSED_DIGITS.shoji
+                ).items()
+                }
+            )
+            | {"0": zero}
+        )
+
 
 _default_config = KanjizeConfiguration()
 
 
-def number2kanji(
-    number: int,
-    error: Optional[str] = None,
-    style: Optional[str] = None,
-    kanji_thousand: Optional[bool] = None,
-    config: Optional[KanjizeConfiguration] = None,
-) -> str:
+def number2kanji(number: int, config: KanjizeConfiguration = _default_config) -> str:
     """
     :param number: [deprecated] Integer to convert into Kanji.
-    :param error: [deprecated] How to handle Error. "raise": raise error. "ignore": ignore error , "warn": warn but don't raise
-    :param style: [deprecated] Which style of format will be used. "mixed": Arabic and Kanji Mixed like "4億5230万3千", "all": All letter will be Kanji.
-    :param kanji_thousand: [deprecated] Whether you make a thousand to kanji. this will be used if style="mixed"
     :param config: KanjizeConfiguration
     :return: str
     """
-    if config is None:
-        config = KanjizeConfiguration()
-
-    if (error or style or kanji_thousand) is not None:
-        warnings.warn(
-            "`error`, `style` and `kanji_thousand` arguments are deprecated. use config instead",
-            DeprecationWarning,
-        )
-    if error is not None:
-        if error not in ("raise", "warn", "ignore"):
-            raise ValueError(f"unexpected value `{error}` for argument error")
-    if style is not None:
-        if style not in ("all", "mixed"):
-            raise ValueError(f"unexpected value `{style}` for argument style")
-        config.style = KanjizeStyle(style)
-    if kanji_thousand is not None:
-        if not isinstance(kanji_thousand, bool):
-            raise ValueError(
-                f"unexpected value `{kanji_thousand}` for argument kanji_thousand"
-            )
-        config.kanji_thousand = kanji_thousand
-
     if number == 0:
         return config.zero
 
-    digits = {v: k for k, v in config.digits.items()}
     units = ("", *config.unit_dict.keys())
+
+    if not isinstance(number, int):
+        number = int(number)
 
     is_negative = number < 0
     number = abs(number)
 
+    result = ""  # all letters will be added to this
     if config.style is KanjizeStyle.ALL:
-        result = ""  # all letters will be added to this
-
-        for i in range(math.ceil(math.log(number, 1000)), -1, -1):
-            c_num = str((number % (10 ** ((i + 1) * 4))) // (10 ** (i * 4))).zfill(
-                4
-            )  # remainder
-            c_str = ""
-            if c_num == "0000":
+        digits = config.reversed_digits
+        little_unit_by_value = config.little_unit_by_value
+        for i in range(math.ceil(len(str(number)) / 4), -1, -1):
+            c_num = (number // (10000 ** i)) % 10000
+            if not c_num:
                 continue
 
-            if c_num[0] != "0":  # thousands
-                if c_num[0] != "1":
-                    c_str += digits[int(c_num[0])]
-                c_str += config.little_units[1000]
-            if c_num[1] != "0":  # hundreds
-                if c_num[1] != "1":
-                    c_str += digits[int(c_num[1])]
-                c_str += config.little_units[100]
-            if c_num[2] != "0":  # tens
-                if c_num[2] != "1":
-                    c_str += digits[int(c_num[2])]
-                c_str += config.little_units[10]
-            if c_num[3] != "0":  # ones
-                c_str += digits[int(c_num[3])]
-
-            if c_str:
-                result += c_str + units[i]
-
-    elif config.style is KanjizeStyle.MIXED:
-        result = ""  # all letters will be added to this
-
-        for i in range(math.ceil(math.log(number, 1000)), -1, -1):
-            c_num = (number % (10 ** ((i + 1) * 4))) // (10 ** (i * 4))  # reminder
             c_str = ""
-            if (
-                config.kanji_thousand and c_num >= 1000 and c_num % 1000 == 0
-            ):  # If number is n * thousand
-                c_str += str(c_num).zfill(4)[-4] + config.little_units[1000]
-            elif c_num:
-                c_str = str(c_num)
+            thousands, c_num = divmod(c_num, 1000)
+            hundreds, c_num = divmod(c_num, 100)
+            tens, ones = divmod(c_num, 10)
+
+            if thousands:
+                if thousands > 1:
+                    c_str += digits[thousands]
+                c_str += little_unit_by_value[1000]
+            if hundreds:
+                if hundreds > 1:
+                    c_str += digits[hundreds]
+                c_str += little_unit_by_value[100]
+            if tens:
+                if tens > 1:
+                    c_str += digits[tens]
+                c_str += little_unit_by_value[10]
+            if ones:
+                c_str += digits[ones]
+
             if c_str:
                 result += c_str + units[i]
+    elif config.style is KanjizeStyle.MIXED:
+        little_unit_by_value = config.little_unit_by_value
+        for i in range(math.ceil(len(str(number)) / 4), -1, -1):
+            c_num = (number // (10000 ** i)) % 10000
+            if (
+                    config.kanji_thousand and c_num >= 1000 and c_num % 1000 == 0
+            ):  # If number is n * thousand
+                result += f"{c_num // 1000}{little_unit_by_value[1000]}{units[i]}"
+            elif c_num:
+                result += str(c_num) + units[i]
     elif config.style is KanjizeStyle.FLAT:
-        table = str.maketrans(
-            {str(v): k for k, v in config.digits.items()} | {str(0): config.zero}
-        )
-        result = str(number).translate(table)
+        result = str(number).translate(config.flat_table)
     if is_negative:
-        result = f"-{result}"
+        return f"-{result}"
     return result
 
 
@@ -218,13 +222,20 @@ def kanji2number(kanjis: str) -> float:
 
     given = kanjis
     is_negative = kanjis[0] in "-－⁻"
-    if kanjis[0] in "-－⁻+＋⁺₊+":
+    if is_negative or kanjis[0] in "+＋⁺₊+":
         kanjis = kanjis[1:]
-    result = _kanji2number(given, kanjis)[0]
+    result = _kanji2number(given, kanjis)
     return result * -1 if is_negative else result
 
 
-def _kanji2number(given: str, kanjis: str) -> (float, str):
+short_regex = re.compile(
+    r"(?:(.*?)({}))?(.*)".format("|".join(_default_config.unit_dict.keys()))
+)
+default_unit_dict = _default_config.unit_dict
+unit_regex = re.compile("|".join(default_unit_dict.keys()))
+
+
+def _kanji2number(given: str, kanjis: str) -> float:
     """Internal function. Converts kanji str without sign to the number.
     This calls itself recursively.
 
@@ -235,34 +246,78 @@ def _kanji2number(given: str, kanjis: str) -> (float, str):
     :raises ValueError: if the value of kanjis is invalid as number
     """
 
-    match = re.compile(
-        r"(?:(.*?)({}))?(.*)".format("|".join(_default_config.unit_dict.keys()))
-    ).match(kanjis)
-    left_val, left_unit, kanjis = match.groups()
+    result = 0
+    min_unit: int | None = None
 
-    if left_unit and not left_val:
-        raise ValueError(
-            f"Kanji `{given}` seems to be invalid. `{left_unit}` needs any leading number."
-        )
+    while kanjis:
+        left_val, left_unit, kanjis = short_regex.match(kanjis).groups()
 
-    base_unit = _default_config.unit_dict[left_unit] if left_unit else 0
-    result = parse_short(left_val, base_unit)
-
-    if re.search("|".join(_default_config.unit_dict.keys()), kanjis):
-        fraction, unit = _kanji2number(given, kanjis)
-        if base_unit <= _default_config.unit_dict[unit]:
+        if left_unit and not left_val:
             raise ValueError(
-                f"Kanji `{given}` seems to be invalid. `{left_unit}` is followed by too large unit `{unit}`."
+                f"Kanji `{given}` seems to be invalid. `{left_unit}` needs any leading number."
             )
-    else:
-        fraction = parse_short(kanjis)
 
-    if base_unit and 10**base_unit <= fraction:
-        raise ValueError(
-            f"Kanji `{given}` seems to be invalid. `{left_unit}` is followed by too large number `{kanjis}`."
-        )
+        if (
+                min_unit
+                and left_unit
+                and default_unit_dict[min_unit] <= default_unit_dict[left_unit]
+        ):
+            raise ValueError(
+                f"Kanji `{given}` seems to be invalid. `{min_unit}` is followed by too large unit `{left_unit}`."
+            )
 
-    return result + fraction, left_unit
+        if left_val or left_unit:
+            base_unit = default_unit_dict[left_unit] if left_unit else 0
+            fragment_value = parse_short(left_val, base_unit)
+        elif kanjis:
+            fragment_value = parse_short(kanjis)
+            kanjis = ""
+        else:
+            break
+
+        if min_unit and fragment_value >= 10 ** default_unit_dict[min_unit]:
+            raise ValueError(
+                f"Kanji `{given}` seems to be invalid. `{left_unit}` is followed by too large number `{left_val}`."
+            )
+
+        result += fragment_value
+
+        min_unit = left_unit
+
+    return result
+
+
+number_dict = {
+    "一": 1,
+    "二": 2,
+    "三": 3,
+    "四": 4,
+    "五": 5,
+    "六": 6,
+    "七": 7,
+    "八": 8,
+    "九": 9,
+    "壱": 1,
+    "弐": 2,
+    "参": 3,
+    "肆": 4,
+    "伍": 5,
+    "陸": 6,
+    "漆": 7,
+    "捌": 8,
+    "玖": 9,
+    "零": 0,
+    "〇": 0,
+}
+
+number_dict_table = str.maketrans({k: str(v) for k, v in number_dict.items()})
+little_units = "十百千拾陌佰阡仟萬"
+short_validation_regex = re.compile(
+    rf"[.\d{little_units}{''.join(number_dict.keys())}]+"
+)
+short_parser_regex = re.compile(
+    r"(?:(.*?)[千阡仟])?(?:(.*?)[陌佰百])?(?:(.*?)[十拾])?(.+)?"
+)
 
 
 def parse_short(kanji: Optional[str], base_unit: int = 0) -> float:
@@ -273,51 +328,22 @@ def parse_short(kanji: Optional[str], base_unit: int = 0) -> float:
     """
     if not kanji:
         return 0
-    number_dict = {
-        "一": 1,
-        "二": 2,
-        "三": 3,
-        "四": 4,
-        "五": 5,
-        "六": 6,
-        "七": 7,
-        "八": 8,
-        "九": 9,
-        "壱": 1,
-        "弐": 2,
-        "参": 3,
-        "肆": 4,
-        "伍": 5,
-        "陸": 6,
-        "漆": 7,
-        "捌": 8,
-        "玖": 9,
-        "零": 0,
-        "〇": 0,
-    }
-    number_dict_table = str.maketrans({k: str(v) for k, v in number_dict.items()})
-    little_units = "十百千拾陌佰阡仟萬"
 
-    if not re.compile(
-        r"[.\d{}{}]+$".format(little_units, "".join(number_dict.keys()))
-    ).match(kanji):
+    if not short_validation_regex.fullmatch(kanji):
         raise ValueError(f"Kanji `{kanji}` seems to be invalid.")
-    match = re.compile(r"(?:(.*)[千阡仟])?(?:(.*)[陌佰百])?(?:(.*)[十拾])?(.+)?").match(
-        kanji
-    )
 
-    thousand, hundred, ten, one = match.groups()
+    thousand, hundred, ten, one = short_parser_regex.match(kanji).groups()
     result = 0
     left_unit = 0
     for v, unit in ([thousand, 1000], [hundred, 100], [ten, 10], [one, 1]):
         if v is None:
             continue
         elif v == "":
-            v = Decimal(1)
+            v = 1
         else:
             try:
-                v = Decimal(v.translate(number_dict_table))
-            except DecimalException:
+                v = (float if "." in v else int)(v.translate(number_dict_table))
+            except ValueError:
                 raise ValueError(f"Kanji `{kanji}` seems to be invalid.")
 
         if left_unit and left_unit <= v * unit:
@@ -327,12 +353,8 @@ def parse_short(kanji: Optional[str], base_unit: int = 0) -> float:
         left_unit = unit
 
         result += v * unit
-    int_, *float_ = str(result).split(".")
-    result *= 10**base_unit
 
-    if float_ and len(float_[0]) > base_unit:
-        return float(result)
-    return int(result)
+    return int(result * 10 ** base_unit)
 
 
 class Number(int):
@@ -341,17 +363,11 @@ class Number(int):
         return cls(kanji2number(kanjis=kanjis))
 
     def to_kanji(
-        self,
-        error: Optional[str] = None,
-        style: Optional[str] = None,
-        kanji_thousand: Optional[bool] = None,
-        config: Optional[KanjizeConfiguration] = None,
+            self,
+            config: KanjizeConfiguration = _default_config,
     ):
         return number2kanji(
             number=int(self),
-            error=error,
-            style=style,
-            kanji_thousand=kanji_thousand,
             config=config,
         )
 
