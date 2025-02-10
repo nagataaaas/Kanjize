@@ -1,0 +1,7 @@
+version = 1
+requires-python = ">=3.8"
+
+[[package]]
+name = "kanjize"
+version = "1.6.0"
+source = { editable = "." }

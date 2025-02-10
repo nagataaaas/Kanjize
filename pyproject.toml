@@ -1,0 +1,14 @@
+[project]
+name = "kanjize"
+version = "1.6.0"
+description = "Easy converter between Kanji-Number and Integer"
+readme = "README.md"
+authors = [
+    { name = "nagataaaas", email = "nagata@nagata.pro" }
+]
+requires-python = ">=3.8"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
