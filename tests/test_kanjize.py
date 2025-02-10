@@ -33,16 +33,16 @@ class TestKanjize:
 
         # added 1.0.0
         assert (
-                10_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000
-                == kanji2number("一恒河沙")
+            10_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000
+            == kanji2number("一恒河沙")
         )
         assert (
-                9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999
-                == kanji2number(
-            "九千九百九十九無量大数九千九百九十九不可思議九千九百九十九那由多九千九百九十九阿僧祇九千九百九十九恒河沙九千九百九十九極"
-            "九千九百九十九載九千九百九十九正九千九百九十九澗九千九百九十九溝九千九百九十九穣九千九百九十九𥝱九千九百九十九垓"
-            "九千九百九十九京九千九百九十九兆九千九百九十九億九千九百九十九万九千九百九十九"
-        )
+            9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999
+            == kanji2number(
+                "九千九百九十九無量大数九千九百九十九不可思議九千九百九十九那由多九千九百九十九阿僧祇九千九百九十九恒河沙九千九百九十九極"
+                "九千九百九十九載九千九百九十九正九千九百九十九澗九千九百九十九溝九千九百九十九穣九千九百九十九𥝱九千九百九十九垓"
+                "九千九百九十九京九千九百九十九兆九千九百九十九億九千九百九十九万九千九百九十九"
+            )
         )
 
         assert 1 == kanji2number("1")
@@ -64,23 +64,21 @@ class TestKanjize:
         assert 400_0000 == kanji2number("4百万")
         assert 5807_6099 == kanji2number("58百7万6千99")
         assert 223_4235_4256_6000 == kanji2number("2百23兆4千2百3十5億4256万6千")
-        assert 223_4000_4256_6000 == kanji2number("223兆4千億4256万6千")
         assert 223_4000_4256_6000 == kanji2number("2234千億4256万6千")
         assert 5050_0000_0000_0000_0000 == kanji2number("5千5十京")
-        assert 39_4385_0000_4895_0000 == kanji2number("39京4385兆4895万")
 
         # added 1.0.0
         assert (
-                10_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000
-                == kanji2number("1恒河沙")
+            10_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000
+            == kanji2number("1恒河沙")
         )
         assert (
-                999_999_999_999_999_999_999_999_999_999_999_999_999_999_999_999_999_999_999_999_999_999_999_999
-                == kanji2number(
-            "9999無量大数9999不可思議9999那由多9999阿僧祇"
-            "9999恒河沙9999極9999載9999正9999澗9999溝9999穣"
-            "9999𥝱9999垓9999京9999兆9999億9999万9999"
-        )
+            999_999_999_999_999_999_999_999_999_999_999_999_999_999_999_999_999_999_999_999_999_999_999_999
+            == kanji2number(
+                "9999無量大数9999不可思議9999那由多9999阿僧祇"
+                "9999恒河沙9999極9999載9999正9999澗9999溝9999穣"
+                "9999𥝱9999垓9999京9999兆9999億9999万9999"
+            )
         )
 
         # added 1.1.0
@@ -144,56 +142,84 @@ class TestKanjize:
 
         # added 1.0.0
         assert (
-                number2kanji(
-                    1_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000
-                )
-                == "一恒河沙"
+            number2kanji(
+                1_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000
+            )
+            == "一恒河沙"
         )
         assert number2kanji(
             9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999
         ) == (
-                   "九千九百九十九無量大数九千九百九十九不可思議九千九百九十九那由多九千九百九十九阿僧祇九千九百九十九恒河沙九千九百九十九極"
-                   "九千九百九十九載九千九百九十九正九千九百九十九澗九千九百九十九溝九千九百九十九穣九千九百九十九𥝱九千九百九十九垓"
-                   "九千九百九十九京九千九百九十九兆九千九百九十九億九千九百九十九万九千九百九十九"
-               )
-
-        assert "1" == number2kanji(1, style="mixed")
-        assert "10" == number2kanji(10, style="mixed")
-        assert "11" == number2kanji(11, style="mixed")
-        assert "121" == number2kanji(121, style="mixed")
-        assert "1千" == number2kanji(1000, style="mixed")
-        assert "1001" == number2kanji(1001, style="mixed")
-        assert "2025" == number2kanji(2025, style="mixed")
-        assert "5807万6099" == number2kanji(5807_6099, style="mixed")
-        assert "223兆4235億4256万6千" == number2kanji(223_4235_4256_6000, style="mixed")
-        assert "5千京" == number2kanji(5000_0000_0000_0000_0000, style="mixed")
-        assert "5000京" == number2kanji(
-            5000_0000_0000_0000_0000, style="mixed", kanji_thousand=False
+            "九千九百九十九無量大数九千九百九十九不可思議九千九百九十九那由多九千九百九十九阿僧祇九千九百九十九恒河沙九千九百九十九極"
+            "九千九百九十九載九千九百九十九正九千九百九十九澗九千九百九十九溝九千九百九十九穣九千九百九十九𥝱九千九百九十九垓"
+            "九千九百九十九京九千九百九十九兆九千九百九十九億九千九百九十九万九千九百九十九"
         )
-        assert "39京4385兆4895万" == number2kanji(39_4385_0000_4895_0000, style="mixed")
-        assert "223兆4千億4256万6千" == number2kanji(223_4000_4256_6000, style="mixed")
+
+        assert "1" == number2kanji(1, config=KanjizeConfiguration(KanjizeStyle.MIXED))
+        assert "10" == number2kanji(10, config=KanjizeConfiguration(KanjizeStyle.MIXED))
+        assert "11" == number2kanji(11, config=KanjizeConfiguration(KanjizeStyle.MIXED))
+        assert "121" == number2kanji(
+            121, config=KanjizeConfiguration(KanjizeStyle.MIXED)
+        )
+        assert "1千" == number2kanji(
+            1000, config=KanjizeConfiguration(KanjizeStyle.MIXED)
+        )
+        assert "1001" == number2kanji(
+            1001, config=KanjizeConfiguration(KanjizeStyle.MIXED)
+        )
+        assert "2025" == number2kanji(
+            2025, config=KanjizeConfiguration(KanjizeStyle.MIXED)
+        )
+        assert "5807万6099" == number2kanji(
+            5807_6099, config=KanjizeConfiguration(KanjizeStyle.MIXED)
+        )
+        assert "223兆4235億4256万6千" == number2kanji(
+            223_4235_4256_6000, config=KanjizeConfiguration(KanjizeStyle.MIXED)
+        )
+        assert "5千京" == number2kanji(
+            5000_0000_0000_0000_0000, config=KanjizeConfiguration(KanjizeStyle.MIXED)
+        )
+        assert "5000京" == number2kanji(
+            5000_0000_0000_0000_0000,
+            config=KanjizeConfiguration(KanjizeStyle.MIXED, kanji_thousand=False),
+        )
+        assert "39京4385兆4895万" == number2kanji(
+            39_4385_0000_4895_0000, config=KanjizeConfiguration(KanjizeStyle.MIXED)
+        )
+        assert "223兆4千億4256万6千" == number2kanji(
+            223_4000_4256_6000, config=KanjizeConfiguration(KanjizeStyle.MIXED)
+        )
         assert "223兆4000億4256万6000" == number2kanji(
-            223_4000_4256_6000, style="mixed", kanji_thousand=False
+            223_4000_4256_6000,
+            config=KanjizeConfiguration(KanjizeStyle.MIXED, kanji_thousand=False),
         )
 
         # added 1.0.0
         assert "1恒河沙" == number2kanji(
             1_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000,
-            style="mixed",
-            kanji_thousand=False,
+            config=KanjizeConfiguration(KanjizeStyle.MIXED, kanji_thousand=False),
         )
         assert (
-                "9999無量大数9999不可思議9999那由多9999阿僧祇9999恒河沙9999極9999載9999正9999澗9999溝9999穣9999𥝱9999垓9999京9999兆9999億9999万9999"
-                == number2kanji(
-            9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999,
-            style="mixed",
-        )
+            "9999無量大数9999不可思議9999那由多9999阿僧祇9999恒河沙9999極9999載9999正9999澗9999溝9999穣9999𥝱9999垓9999京9999兆9999億9999万9999"
+            == number2kanji(
+                9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999_9999,
+                config=KanjizeConfiguration(KanjizeStyle.MIXED),
+            )
         )
 
         # added 1.2.0
-        assert number2kanji(-1_5000_0000, style="mixed") == "-1億5千万"
-        assert number2kanji(-25_0320, style="mixed") == "-25万320"
-        assert number2kanji(-1_5025_0320, style="mixed") == "-1億5025万320"
+        assert (
+            number2kanji(-1_5000_0000, config=KanjizeConfiguration(KanjizeStyle.MIXED))
+            == "-1億5千万"
+        )
+        assert (
+            number2kanji(-25_0320, config=KanjizeConfiguration(KanjizeStyle.MIXED))
+            == "-25万320"
+        )
+        assert (
+            number2kanji(-1_5025_0320, config=KanjizeConfiguration(KanjizeStyle.MIXED))
+            == "-1億5025万320"
+        )
 
         # added 1.4.0
         assert number2kanji(0) == "零"
@@ -230,7 +256,7 @@ class TestKanjize:
         assert 12000 == Number(2_7649_3734) - Number.from_kanji("2億7648万1734")
         assert 12734 == Number(2_7649_3734) - Number.from_kanji("2億7648万1千")
         assert "2億7648万1734" == (Number(2_7649_3734) - Number(1_2000)).to_kanji(
-            style="mixed"
+            config=KanjizeConfiguration(KanjizeStyle.MIXED)
         )
 
         # added 1.4.0

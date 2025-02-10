@@ -1,5 +1,6 @@
 [project]
 name = "kanjize"
+url = "https://github.com/nagataaaas/Kanjize"
 version = "1.6.0"
 description = "Easy converter between Kanji-Number and Integer"
 readme = "README.md"
@@ -8,10 +9,36 @@ authors = [
 ]
 requires-python = ">=3.8"
 dependencies = []
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Other Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+keywords = ["kanji", "number", "converter", "japanese", "integer"]
+
+[project.urls]
+Homepage = "https://github.com/nagataaaas/Kanjize"
+Documentation = "https://github.com/nagataaaas/Kanjize/blob/master/README.md"
+Repository = "https://github.com/nagataaaas/Kanjize.git"
+Issues = "https://github.com/nagataaaas/Kanjize/issues"
+Changelog = "https://github.com/nagataaaas/Kanjize/blob/master/CHANGELOG.md"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+only-packages = true
+only-include = ["src/kanjize"]
+sources = ["src"]
+
+[tool.hatch.build.targets.sdist]
+exclude = ["tests", ".github", "uv.lock", "Makefile", ".python-version"]
 
 [dependency-groups]
 dev = [

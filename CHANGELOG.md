@@ -1,3 +1,8 @@
+# 1.6.0
+- now uses `uv` for packaging
+- significant performance improvement ( up to 8x faster )
+- removed deprecated arguments `error`, `style` and `kanji_thousand` from `number2kanji` and `Number().to_kanji`
+
 # 1.5.0
 
 - more accurate error raising. (contributed by @ikedas)
