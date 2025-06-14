@@ -209,10 +209,10 @@ def number2kanji(number: int, config: KanjizeConfiguration = _default_config) ->
     return result
 
 
-def kanji2number(kanjis: str) -> float:
+def kanji2number(kanjis: str) -> int:
     """
     :param kanjis: Kanji str to convert into Integer
-    :return: float
+    :return: int
     """
     if not kanjis:
         raise ValueError("Kanji is empty")
@@ -235,14 +235,14 @@ default_unit_dict = _default_config.unit_dict
 unit_regex = re.compile("|".join(default_unit_dict.keys()))
 
 
-def _kanji2number(given: str, kanjis: str) -> float:
+def _kanji2number(given: str, kanjis: str) -> int:
     """Internal function. Converts kanji str without sign to the number.
     This calls itself recursively.
 
     :param given: Original kanji str to be converted finally
     :param kanjis: Kanji str to be converted
     :return: the value of kanjis and the name of the most significant unit
-    :rtype: (float, str)
+    :rtype: int
     :raises ValueError: if the value of kanjis is invalid as number
     """
 
@@ -320,7 +320,7 @@ short_parser_regex = re.compile(
 )
 
 
-def parse_short(kanji: Optional[str], base_unit: int = 0) -> float:
+def parse_short(kanji: Optional[str], base_unit: int = 0) -> int:
     """
     :param kanji: Kanji str to convert into Integer
     :param base_unit: multiply by 10 ** base_unit
