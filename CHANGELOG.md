@@ -1,3 +1,6 @@
+# 1.6.1
+- fix return type of (thanks to @yahiro-code)
+
 # 1.6.0
 - now uses `uv` for packaging
 - significant performance improvement ( up to 8x faster )

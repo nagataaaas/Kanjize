@@ -1,7 +1,7 @@
 [project]
 name = "kanjize"
 url = "https://github.com/nagataaaas/Kanjize"
-version = "1.6.0"
+version = "1.6.1"
 description = "Easy converter between Kanji-Number and Integer"
 readme = "README.md"
 authors = [
